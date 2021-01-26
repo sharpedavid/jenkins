@@ -26,7 +26,7 @@ pipeline {
                                                 sshTransfer(
                                                         cleanRemote: false,
                                                         excludes: '',
-                                                        execCommand: 'nohup /etc/alternatives/jre_11/bin/java demo-0.0.1-SNAPSHOT.jar &',
+                                                        execCommand: 'nohup /etc/alternatives/jre_11/bin/java -jar demo-0.0.1-SNAPSHOT.jar > nohup.out &',
                                                         execTimeout: 120000,
                                                         flatten: false,
                                                         makeEmptyDirs: false,
@@ -34,8 +34,8 @@ pipeline {
                                                         patternSeparator: '[, ]+',
                                                         remoteDirectory: '',
                                                         remoteDirectorySDF: false,
-                                                        removePrefix: '',
-                                                        sourceFiles: 'demo-0.0.1-SNAPSHOT.jar')
+                                                        removePrefix: 'target',
+                                                        sourceFiles: 'target/demo-0.0.1-SNAPSHOT.jar')
                                         ],
                                         usePromotionTimestamp: false,
                                         useWorkspaceInPromotion: false,
