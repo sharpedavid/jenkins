@@ -14,18 +14,24 @@ pipeline {
         }
         stage('Build') {
             steps {
-                echo "Chosen environment is ${params.ENVIRONMENT}"
                 sh 'mvn package'
             }
         }
-        stage('Hello') {
+        stage('Deploy') {
             steps {
+                script {
+                    if (params.ENVIRONMENT == 'DEV') {
+                        sshServer = "Fireblade"
+                    } else if (params.ENVIRONMENT == 'TEST') {
+                        sshServer = "Shadow"
+                    }
+                }
                 sshPublisher(
                         continueOnError: false,
                         failOnError: true,
                         publishers: [
                                 sshPublisherDesc(
-                                        configName: 'Fireblade',
+                                        configName: "${sshServer}",
                                         transfers: [
                                                 sshTransfer(
                                                         execCommand: 'nohup /etc/alternatives/jre_11/bin/java -jar demo-0.0.1-SNAPSHOT.jar > nohup.out &',
