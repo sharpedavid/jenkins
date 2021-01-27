@@ -33,7 +33,7 @@ pipeline {
                                                         sourceFiles: 'target/demo-0.0.1-SNAPSHOT.jar'),
                                                 sshTransfer(
                                                         flatten: true,
-                                                        sourceFiles: 'config/${params.ENVIRONMENT}/application.properties')
+                                                        sourceFiles: "config/${params.ENVIRONMENT}/application.properties")
                                         ],
                                         usePromotionTimestamp: false,
                                         useWorkspaceInPromotion: false,
