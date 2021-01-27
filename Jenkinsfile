@@ -3,6 +3,9 @@ pipeline {
     tools {
         maven 'Maven'
     }
+    parameters {
+        choice(choices: ['DEV', 'TEST'], description: '', name: 'ENVIRONMENT')
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -11,6 +14,7 @@ pipeline {
         }
         stage('Build') {
             steps {
+                echo "Chosen environment is ${params.ENVIRONMENT}"
                 sh 'mvn package'
             }
         }
