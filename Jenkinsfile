@@ -7,11 +7,12 @@ pipeline {
     }
     parameters {
         choice(choices: ['DEV', 'TEST'], description: '', name: 'ENVIRONMENT')
+        string(defaultValue: 'master', description: '', name: 'BUILD_BRANCH')
     }
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/sharpedavid/jenkins'
+                git branch: "${params.BUILD_BRANCH}", url: 'https://github.com/sharpedavid/jenkins'
             }
         }
         stage('Build') {
