@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${params.BUILD_BRANCH}", url: 'https://github.com/sharpedavid/jenkins'
+                checkout([$class: 'GitSCM', branches: [[name: "${params.BUILD_BRANCH}"]], userRemoteConfigs: [[url: 'https://github.com/sharpedavid/jenkins']]])
             }
         }
         stage('Build') {
