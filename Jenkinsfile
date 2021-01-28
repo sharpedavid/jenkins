@@ -22,10 +22,10 @@ pipeline {
             }
         }
         stage('Deploy') {
+            when {
+                expression { params.DEPLOY == true }
+            }
             steps {
-                when {
-                    expression { params.DEPLOY == true }
-                }
                 script {
                     if (params.ENVIRONMENT == 'DEV') {
                         sshServer = DEV_ENVS
