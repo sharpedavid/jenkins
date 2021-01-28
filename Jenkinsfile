@@ -6,8 +6,9 @@ pipeline {
         maven 'Maven'
     }
     parameters {
-        choice(choices: ['DEV', 'TEST'], description: '', name: 'ENVIRONMENT')
-        string(defaultValue: 'master', description: '', name: 'BUILD_BRANCH')
+        string(defaultValue: 'master', description: 'Branch or tag to build. Tags must be specified as "refs/tags/<tagName>".', name: 'BUILD_BRANCH')
+        booleanParam(defaultValue: false, description: 'Check box to deploy build.', name: 'DEPLOY')
+        choice(choices: ['DEV', 'TEST'], description: 'Deploy to this environment.', name: 'ENVIRONMENT')
     }
     stages {
         stage('Checkout') {
@@ -22,6 +23,9 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                when {
+                    expression { params.DEPLOY == true }
+                }
                 script {
                     if (params.ENVIRONMENT == 'DEV') {
                         sshServer = DEV_ENVS
