@@ -1,5 +1,5 @@
-def DEV_ENVS = ["Fireblade"]
-def TEST_ENVS = ["Shadow", "Fireblade"]
+def DEV_ENVS = ["fireblade.hlth.gov.bc.ca"]
+def TEST_ENVS = ["shadow.hlth.gov.bc.ca", "fireblade.hlth.gov.bc.ca"]
 pipeline {
     agent any
     tools {
@@ -9,6 +9,8 @@ pipeline {
         string(defaultValue: 'master', description: 'Branch or tag to build. Tags must be specified as "refs/tags/<tagName>".', name: 'BUILD_BRANCH')
         booleanParam(defaultValue: false, description: 'Check box to deploy build.', name: 'DEPLOY')
         choice(choices: ['DEV', 'TEST'], description: 'Deploy to this environment.', name: 'ENVIRONMENT')
+        string(defaultValue: 'dasharpe', description: 'TODO', name: 'USERNAME')
+        password(name: 'PASSWORD')
     }
     stages {
         stage('Checkout') {
@@ -22,9 +24,6 @@ pipeline {
             }
         }
         stage('Deploy') {
-            when {
-                expression { params.DEPLOY == true }
-            }
             steps {
                 script {
                     if (params.ENVIRONMENT == 'DEV') {
@@ -35,28 +34,19 @@ pipeline {
                 }
                 script {
                     for (int i = 0; i < sshServer.size(); ++i) {
-                        sshPublisher(
-                                continueOnError: false,
-                                failOnError: true,
-                                publishers: [
-                                        sshPublisherDesc(
-                                                configName: "${sshServer[i]}",
-                                                transfers: [
-                                                        sshTransfer(
-                                                                execCommand: 'nohup /etc/alternatives/jre_11/bin/java -jar demo-0.0.1-SNAPSHOT.jar > nohup.out &',
-                                                                removePrefix: 'target',
-                                                                sourceFiles: 'target/demo-0.0.1-SNAPSHOT.jar'),
-                                                        sshTransfer(
-                                                                flatten: true,
-                                                                sourceFiles: "config/${params.ENVIRONMENT}/application.properties")
-                                                ],
-                                                usePromotionTimestamp: false,
-                                                useWorkspaceInPromotion: false,
-                                                verbose: false)
-                                ]
-                        )
+                        def remote = [:]
+                        remote.name = sshServer[i]
+                        remote.host =  sshServer[i]
+                        remote.user = params.USERNAME
+                        remote.password = params.PASSWORD
+                        remote.allowAnyHosts = true
+                        remote.pty = true
+                        stage('Remote SSH') {
+                            sshPut remote: remote, from: 'target/demo-0.0.1-SNAPSHOT.jar', into: 'demo-0.0.1-SNAPSHOT.jar'
+                            sshPut remote: remote, from: "config/${params.ENVIRONMENT}/application.properties", into: 'application.properties'
+                            sshCommand remote: remote, command: './script.sh'
+                        }
                     }
-
                 }
             }
         }
