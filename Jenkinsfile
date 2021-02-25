@@ -24,6 +24,9 @@ pipeline {
             }
         }
         stage('Deploy') {
+            when {
+                expression { params.DEPLOY == true }
+            }
             steps {
                 script {
                     if (params.ENVIRONMENT == 'DEV') {
@@ -31,21 +34,18 @@ pipeline {
                     } else if (params.ENVIRONMENT == 'TEST') {
                         sshServer = TEST_ENVS
                     }
-                }
-                script {
                     for (int i = 0; i < sshServer.size(); ++i) {
                         def remote = [:]
                         remote.name = sshServer[i]
-                        remote.host =  sshServer[i]
+                        remote.host = sshServer[i]
                         remote.user = params.USERNAME
                         remote.password = params.PASSWORD
                         remote.allowAnyHosts = true
                         remote.pty = true
-                        stage('Remote SSH') {
-                            sshPut remote: remote, from: 'target/demo-0.0.1-SNAPSHOT.jar', into: 'demo-0.0.1-SNAPSHOT.jar'
-                            sshPut remote: remote, from: "config/${params.ENVIRONMENT}/application.properties", into: 'application.properties'
-                            sshCommand remote: remote, command: './script.sh'
-                        }
+                        sshPut remote: remote, from: 'target/demo-0.0.1-SNAPSHOT.jar', into: 'demo-0.0.1-SNAPSHOT.jar'
+                        sshPut remote: remote, from: "config/${params.ENVIRONMENT}/application.properties", into: 'application.properties'
+                        sshPut remote: remote, from: 'script.sh', into: 'script.sh'
+                        sshCommand remote: remote, command: 'chmod u+x script.sh; ./script.sh'
                     }
                 }
             }
