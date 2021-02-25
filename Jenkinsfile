@@ -9,7 +9,7 @@ pipeline {
         string(defaultValue: 'master', description: 'Branch or tag to build. Tags must be specified as "refs/tags/<tagName>".', name: 'BUILD_BRANCH')
         booleanParam(defaultValue: false, description: 'Check box to deploy build.', name: 'DEPLOY')
         choice(choices: ['DEV', 'TEST'], description: 'Deploy to this environment.', name: 'ENVIRONMENT')
-        string(defaultValue: 'dasharpe', description: 'TODO', name: 'USERNAME')
+        string(name: 'USERNAME')
         password(name: 'PASSWORD')
     }
     stages {
